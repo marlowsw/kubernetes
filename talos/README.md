@@ -1,4 +1,4 @@
-# Talos Cluster Scripts
+# Talos Cluster Deployment
 # Prerequisites
 - DHCP/DNS server- I'm running pfsense and a bind9 docker deployment
 - admin node- I use an ubuntu 24.04 VM configured with packages for managing kubernetes
