@@ -124,3 +124,131 @@ sleep 10
 echo -e "${RED}Bootstrapping Talos Kubernetes cluster...${NC}"
 talosctl bootstrap
 
+sleep 300
+
+
+echo -e "${GREEN}Checking for nodes...${NC}"
+kubectl get nodes
+
+sleep 30
+
+echo -e "${GREEN}Installing Kubernetes-csi-nfs-driver...${NC}"
+helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+
+helm repo update
+
+sleep 10
+
+helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+    --namespace kube-system \
+    --set kubeletDir=/var/lib/kubelet
+
+sleep 60
+
+kubectl get pods -n kube-system
+sleep 10
+
+echo -e "${GREEN}Creating StorageClass...${NC}"
+# Create the StorageClass YAML file
+cat <<EOF > sc-nfs.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 10.0.0.90
+  share: /mnt/Labdata
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1
+EOF
+
+sleep 10
+
+# Apply it to the cluster
+kubectl apply -f sc-nfs.yaml
+
+echo -e "${GREEN}Creating Test PVC...${NC}"
+cat <<EOF > pvc-nfs.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: nfs-csi
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+EOF
+
+kubectl apply -f pvc-nfs.yaml
+
+sleep 10
+
+kubectl get pvc
+
+echo -e "${GREEN}Installing Kubernetes Metrics Server...${NC}"
+
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+sleep 30
+
+kubectl patch deployment metrics-server -n kube-system --type='json' -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+sleep 30
+
+kubectl get pods -n kube-system |grep -i metric
+
+sleep 10
+
+echo -e "${GREEN}Applying label to worker nodes...${NC}"
+kubectl label node talos-worker-1 node-role.kubernetes.io/worker=worker
+kubectl label node talos-worker-2 node-role.kubernetes.io/worker=worker
+kubectl label node talos-worker-3 node-role.kubernetes.io/worker=worker
+kubectl label node talos-test-1 node-role.kubernetes.io/worker=worker
+kubectl label node talos-test-2 node-role.kubernetes.io/worker=worker
+kubectl label node talos-test-3 node-role.kubernetes.io/worker=worker
+
+sleep 10
+
+echo -e "${GREEN}Installing the Kubernetes Dashboard...${NC}"
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+
+sleep 30
+
+echo -e "${GREEN}Creating Admin User...${NC}"
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+
+echo -e "${GREEN}Exposing the Kubernetes Dashboard...${NC}"
+nohup kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 --address 0.0.0.0 > /tmp/kdash.log 2>&1 &
+
+echo -e "${GREEN}Generating login token...${NC}"
+kubectl -n kubernetes-dashboard create token admin-user --duration=8000h
+
+echo -e "${GREEN}Use the token above to login to your cluster at https://<your-node-ip>:8443...${NC}"

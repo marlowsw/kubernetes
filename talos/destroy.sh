@@ -14,3 +14,5 @@ rm /home/smarz/talos/controlplane.yaml --force
 rm /home/smarz/talos/kubeconfig --force
 rm /home/smarz/talos/talosconfig --force
 rm /home/smarz/talos/worker.yaml --force
+rm /home/smarz/talos/sc-nfs.yaml --force
+rm /home/smarz/talos/pvc-nfs.yaml --force
