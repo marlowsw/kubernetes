@@ -215,6 +215,32 @@ kubectl label node talos-test-3 node-role.kubernetes.io/worker=worker
 
 sleep 10
 
+echo -e "${GREEN}Installing Cert-Manager...${NC}"
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
+
+sleep 5
+
+echo -e "${GREEN}Applying letsencrypt ClusterIssuer...${NC}"
+kubectl apply -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: support@drunkcoding.net
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+EOF
+
+sleep 10
+
 echo -e "${GREEN}Installing the Kubernetes Dashboard...${NC}"
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 
@@ -252,3 +278,5 @@ echo -e "${GREEN}Generating login token...${NC}"
 kubectl -n kubernetes-dashboard create token admin-user --duration=8000h
 
 echo -e "${GREEN}Use the token above to login to your cluster at https://<your-node-ip>:8443...${NC}"
+
+
