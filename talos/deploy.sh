@@ -218,8 +218,12 @@ sleep 10
 echo -e "${GREEN}Installing Cert-Manager...${NC}"
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
 
-sleep 5
-
+# Wait for the webhook to become available
+echo -e "${GREEN}Waiting for cert-manager-webhook to become available...${NC}"
+kubectl wait --namespace cert-manager \
+  --for=condition=Available deployment/cert-manager-webhook \
+  --timeout=120s
+  
 echo -e "${GREEN}Applying letsencrypt ClusterIssuer...${NC}"
 kubectl apply -f - <<EOF
 apiVersion: cert-manager.io/v1
