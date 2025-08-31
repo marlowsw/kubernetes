@@ -54,17 +54,17 @@ EOF
 
 # === Node creation ===
 echo -e "${YELLOW}Creating control-plane nodes...${NC}"
-create_vm $PROXMOX_HOST 107 "talos-control-1" bc:24:11:a4:03:10
+create_vm $PROXMOX_HOST1 107 "talos-control-1" bc:24:11:a4:03:10
 sleep 30
-create_vm $PROXMOX_HOST1 201 "talos-control-2" bc:24:11:27:7b:98
+create_vm $PROXMOX_HOST2 201 "talos-control-2" bc:24:11:27:7b:98
 sleep 30
-create_vm $PROXMOX_HOST2 301 "talos-control-3" bc:24:11:2d:eb:88
+create_vm $PROXMOX_HOST3 301 "talos-control-3" bc:24:11:2d:eb:88
 sleep 30
 
 echo -e "${YELLOW}Creating worker nodes...${NC}"
-create_vm $PROXMOX_HOST 108 "talos-worker-1" bc:24:11:5f:81:3c
+create_vm $PROXMOX_HOST1 108 "talos-worker-1" bc:24:11:5f:81:3c
 sleep 30
-create_vm $PROXMOX_HOST 109 "talos-worker-2" bc:24:11:80:db:1c
+create_vm $PROXMOX_HOST2 109 "talos-worker-2" bc:24:11:80:db:1c
 sleep 30
 create_vm $PROXMOX_HOST1 202 "talos-worker-3" bc:24:11:9f:5a:6a
 sleep 30

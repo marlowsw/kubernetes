@@ -5,14 +5,14 @@ NC='\033[0m'
 
 # Define hosts and their VMID ranges
 declare -A HOST_RANGES
-HOST_RANGES["root@nas1"]="107..109"
-HOST_RANGES["root@mini1"]="201..203"
-HOST_RANGES["root@mini2"]="301..303"
-HOST_RANGES["root@mini3"]="401..403"
+HOST_RANGES["root@mini1"]="107 108 202 203"
+HOST_RANGES["root@mini2"]="109 201 302 303"
+HOST_RANGES["root@mini3"]="301 401 402 403"
+#HOST_RANGES["root@mini3"]="401..403"
 
 for HOST in "${!HOST_RANGES[@]}"; do
   RANGE=${HOST_RANGES[$HOST]}
-  for VMID in $(eval echo {$RANGE}); do
+   for VMID in $RANGE; do
     echo -e "${YELLOW}[$HOST] Destroying VM $VMID...${NC}"
     ssh $HOST "qm stop $VMID --timeout 10 2>/dev/null; qm destroy $VMID --purge 2>/dev/null"
   done
