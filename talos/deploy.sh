@@ -155,7 +155,8 @@ talosctl kubeconfig . -f
 sleep 30
 
 echo -e "${GREEN}Exporting KUBECONFIG...${NC}"
-export KUBECONFIG=kubeconfig
+export KUBECONFIG=~/talos/kubeconfig
+
 sleep 10
 
 echo -e "${RED}Bootstrapping Talos Kubernetes cluster...${NC}"
