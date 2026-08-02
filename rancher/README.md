@@ -94,6 +94,8 @@ The default deployment creates:
 
 # Features
 
+```yaml
+
 ## Automated VM Deployment
 
 The cluster builder:
@@ -164,7 +166,6 @@ nfs-csi
 
 Example:
 
-```yaml
 storageClassName: nfs-csi
 accessModes:
   - ReadWriteMany
