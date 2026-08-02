@@ -19,24 +19,24 @@ The goal of this project is to quickly create disposable, repeatable Kubernetes 
 
 # Repository Structure
 
-
+```
 kubernetes/
 |
 ├── rancher/
-│ ├── rancher-build.sh
-│ ├── rancher-cleanup.sh
-│ ├── rancher-full-cleanup.sh
-│ └── rancher-full.sh
+│   ├── rancher-build.sh
+│   ├── rancher-cleanup.sh
+│   ├── rancher-full-cleanup.sh
+│   └── rancher-full.sh
 |
 ├── rocky-k8s/
-│ ├── containerd.sh
-│ └── kubetools.sh
+│   ├── containerd.sh
+│   └── kubetools.sh
 |
 └── talos/
-├── deploy.sh
-├── destroy.sh
-└── README.md
-
+    ├── deploy.sh
+    ├── destroy.sh
+    └── README.md
+```
 
 ---
 
